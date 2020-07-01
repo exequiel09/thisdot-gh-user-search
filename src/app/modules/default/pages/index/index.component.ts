@@ -4,7 +4,18 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import isEqual from 'lodash-es/isEqual';
 import { Observable, of, Subject } from 'rxjs';
-import { auditTime, catchError, distinctUntilChanged, filter, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
+import {
+  auditTime,
+  catchError,
+  distinctUntilChanged,
+  filter,
+  map,
+  pluck,
+  shareReplay,
+  switchMap,
+  tap,
+  withLatestFrom
+} from 'rxjs/operators';
 
 import { GitHubUserSearchResultItem, GitHubUserSearchResults } from '../../models/github-users.model';
 import { GithubApiService, GitHubUserQueryParams } from '../../http/github-api.service';
@@ -38,19 +49,23 @@ export class IndexComponent implements OnInit {
 
         distinctUntilChanged<ClrDatagridStateInterface>(isEqual),
 
-        map(dataGridState => {
-          const queryParams: Partial<GitHubUserQueryParams> = {};
+        withLatestFrom(this._activatedRoute.queryParams),
+
+        map(([dataGridState, queryParams]) => {
+          const newQueryParams: Partial<GitHubUserQueryParams> = {};
 
           if (typeof dataGridState.filters !== 'undefined' && dataGridState.filters.length > 0) {
-            queryParams.q = dataGridState.filters[0].value;
+            newQueryParams.q = dataGridState.filters[0].value;
+          } else if (typeof queryParams.q !== 'undefined') {
+            newQueryParams.q = queryParams.q;
           }
 
           if (typeof dataGridState.page !== 'undefined') {
-            queryParams.page = dataGridState.page.current as number;
-            queryParams.limit = dataGridState.page.size as number;
+            newQueryParams.page = dataGridState.page.current as number;
+            newQueryParams.limit = dataGridState.page.size as number;
           }
 
-          return queryParams;
+          return newQueryParams;
         }),
 
         tap(queryParams => {
