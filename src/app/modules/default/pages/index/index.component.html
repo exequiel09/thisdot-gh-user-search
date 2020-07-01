@@ -3,11 +3,20 @@
 
   <clr-dg-placeholder>We couldn't find any users!</clr-dg-placeholder>
 
-  <ng-container *ngIf="(user$ | async) as result">
-    <clr-dg-row *ngFor="let user of result.items">
-      <clr-dg-cell>{{ user.login }}</clr-dg-cell>
-    </clr-dg-row>
-  </ng-container>
+  <clr-dg-row *ngFor="let user of (user$ | async)">
+    <clr-dg-cell>{{ user.login }}</clr-dg-cell>
+  </clr-dg-row>
+
+  <clr-dg-footer>
+    <clr-dg-pagination [clrDgPage]="page"
+      [clrDgPageSize]="perPage"
+      [clrDgTotalItems]="totalItem$ | async"
+      #pagination>
+      <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">Users per page</clr-dg-page-size>
+      {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
+      of {{ pagination.totalItems }} users
+    </clr-dg-pagination>
+  </clr-dg-footer>
 </clr-datagrid>
 
 
