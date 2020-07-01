@@ -1,0 +1,18 @@
+{
+  "editor.formatOnSave": false,
+  "git.ignoreLimitWarning": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "tslint.configFile": "tslint.json",
+  "files.exclude": {
+    "**/coverage": true,
+    "**/node_modules": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/dist": true,
+    "**/_scripts": true,
+    "**/yarn.lock": true
+  },
+  "vsicons.presets.angular": true
+}
