@@ -27,6 +27,7 @@
     "@clr/icons": "^3.1.4",
     "@clr/ui": "^3.1.4",
     "@webcomponents/webcomponentsjs": "^2.0.0",
+    "backoff-rxjs": "^6.5.7",
     "lodash-es": "^4.17.15",
     "rxjs": "~6.5.5",
     "tslib": "^2.0.0",
