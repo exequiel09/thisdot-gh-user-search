@@ -1,11 +1,13 @@
 <clr-datagrid (clrDgRefresh)="refreshDataGrid($event)">
-  <clr-dg-column>Name</clr-dg-column>
+  <clr-dg-column [clrDgField]="'login'">Name</clr-dg-column>
 
   <clr-dg-placeholder>We couldn't find any users!</clr-dg-placeholder>
 
-  <clr-dg-row *ngFor="let user of users">
-    <clr-dg-cell>Dummy Name</clr-dg-cell>
-  </clr-dg-row>
+  <ng-container *ngIf="(user$ | async) as result">
+    <clr-dg-row *ngFor="let user of result.items">
+      <clr-dg-cell>{{ user.login }}</clr-dg-cell>
+    </clr-dg-row>
+  </ng-container>
 </clr-datagrid>
 
 
