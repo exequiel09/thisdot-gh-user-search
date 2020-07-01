@@ -1,0 +1,27 @@
+<div [clrLoading]="loading">
+  <img [src]="user.avatar_url" />
+
+  <dl class="clr-row" *ngIf="(info$ | async) as user">
+    <ng-container *ngIf="!!user?.bio">
+      <dt class="clr-col-sm-3">Bio</dt>
+      <dd class="clr-col-sm-9">{{ user?.bio }}</dd>
+    </ng-container>
+
+    <ng-container *ngIf="!!user?.stars">
+      <dt class="clr-col-sm-3">Star Count</dt>
+      <dd class="clr-col-sm-9">{{ user?.stars }}</dd>
+    </ng-container>
+
+    <ng-container *ngIf="!!user?.followers">
+      <dt class="clr-col-sm-3">Follower Count</dt>
+      <dd class="clr-col-sm-9">{{ user?.followers }}</dd>
+    </ng-container>
+
+    <ng-container *ngIf="!!user?.public_gists">
+      <dt class="clr-col-sm-3">Public Gists Count</dt>
+      <dd class="clr-col-sm-9">{{ user?.public_gists }}</dd>
+    </ng-container>
+  </dl>
+</div>
+
+

@@ -5,6 +5,7 @@
 
   <clr-dg-row *ngFor="let user of (user$ | async); trackBy: trackByUser">
     <clr-dg-cell>{{ user.login }}</clr-dg-cell>
+    <tdgh-user-detail [user]="user" ngProjectAs="clr-dg-row-detail" *clrIfExpanded></tdgh-user-detail>
   </clr-dg-row>
 
   <clr-dg-footer>
