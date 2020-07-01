@@ -5,6 +5,6 @@ import { Component } from '@angular/core';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
-  title = 'thisdot-gh-user-search';
-}
+export class AppComponent { }
+
+
