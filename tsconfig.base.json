@@ -22,7 +22,6 @@
     ]
   },
   "angularCompilerOptions": {
-    "strictInjectionParameters": true,
-    "strictTemplates": true
+    "strictInjectionParameters": true
   }
 }
