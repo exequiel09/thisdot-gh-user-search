@@ -1,9 +1,9 @@
 <clr-datagrid (clrDgRefresh)="refreshDataGrid($event)">
-  <clr-dg-column [clrDgField]="'login'">Name</clr-dg-column>
+  <clr-dg-column [clrDgField]="'login'">Username</clr-dg-column>
 
   <clr-dg-placeholder>We couldn't find any users!</clr-dg-placeholder>
 
-  <clr-dg-row *ngFor="let user of (user$ | async)">
+  <clr-dg-row *ngFor="let user of (user$ | async); trackBy: trackByUser">
     <clr-dg-cell>{{ user.login }}</clr-dg-cell>
   </clr-dg-row>
 

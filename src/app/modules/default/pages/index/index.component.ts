@@ -98,6 +98,10 @@ export class IndexComponent implements OnInit {
     this._refreshDataGrid$.next(state);
   }
 
+  trackByUser(user: GitHubUserSearchResultItem): number {
+    return user.id;
+  }
+
 }
 
 
