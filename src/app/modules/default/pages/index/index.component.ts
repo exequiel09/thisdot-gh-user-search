@@ -7,33 +7,7 @@ import isEqual from 'lodash-es/isEqual';
 import { Observable, of, Subject } from 'rxjs';
 import { auditTime, catchError, distinctUntilChanged, filter, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
 
-export interface SearchResultItem {
-  login: string;
-  id: number;
-  node_id: string;
-  avatar_url: string;
-  gravatar_id: string;
-  url: string;
-  html_url: string;
-  followers_url: string;
-  following_url: string;
-  gists_url: string;
-  starred_url: string;
-  subscriptions_url: string;
-  organizations_url: string;
-  repos_url: string;
-  events_url: string;
-  received_events_url: string;
-  type: string;
-  site_admin: boolean;
-  score: number;
-}
-
-export interface SearchResults {
-  total_count: number;
-  incomplete_results: boolean;
-  items: SearchResultItem[];
-}
+import { GitHubUserSearchResultItem, GitHubUserSearchResults } from '../../models/github-users.model';
 
 @Component({
   templateUrl: './index.component.html',
@@ -43,11 +17,11 @@ export interface SearchResults {
 export class IndexComponent implements OnInit {
   page = 1;
   perPage = 20;
-  user$: Observable<SearchResultItem[]>;
+  user$: Observable<GitHubUserSearchResultItem[]>;
   totalItem$: Observable<number>;
   refreshDataGrid$: Observable<ClrDatagridStateInterface>;
 
-  private readonly _response$: Observable<SearchResults>;
+  private readonly _response$: Observable<GitHubUserSearchResults>;
   private readonly _refreshDataGrid$ = new Subject<ClrDatagridStateInterface>();
 
   constructor(
@@ -104,8 +78,8 @@ export class IndexComponent implements OnInit {
         params = params.append('page', queryParams.page);
         params = params.append('per_page', queryParams.limit);
 
-        return this._httpClient.get<SearchResults>('https://api.github.com/search/users', { params }).pipe(
-          catchError(() => of<SearchResults>({
+        return this._httpClient.get<GitHubUserSearchResults>('https://api.github.com/search/users', { params }).pipe(
+          catchError(() => of<GitHubUserSearchResults>({
             total_count: 0,
             incomplete_results: false,
             items: [],
