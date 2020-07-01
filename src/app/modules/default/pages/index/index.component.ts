@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ClrDatagridStateInterface } from '@clr/angular';
@@ -8,6 +7,7 @@ import { Observable, of, Subject } from 'rxjs';
 import { auditTime, catchError, distinctUntilChanged, filter, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
 
 import { GitHubUserSearchResultItem, GitHubUserSearchResults } from '../../models/github-users.model';
+import { GithubApiService, GitHubUserQueryParams } from '../../http/github-api.service';
 
 @Component({
   templateUrl: './index.component.html',
@@ -27,8 +27,8 @@ export class IndexComponent implements OnInit {
   constructor(
     private readonly _activatedRoute: ActivatedRoute,
     private readonly _cdr: ChangeDetectorRef,
-    private readonly _httpClient: HttpClient,
-    private readonly _router: Router
+    private readonly _router: Router,
+    private readonly _githubApiService: GithubApiService
   ) {
     this.refreshDataGrid$ = this._refreshDataGrid$.asObservable();
 
@@ -39,10 +39,10 @@ export class IndexComponent implements OnInit {
         distinctUntilChanged<ClrDatagridStateInterface>(isEqual),
 
         map(dataGridState => {
-          const queryParams: Record<string, string | number> = {};
+          const queryParams: Partial<GitHubUserQueryParams> = {};
 
           if (typeof dataGridState.filters !== 'undefined' && dataGridState.filters.length > 0) {
-            queryParams.username = dataGridState.filters[0].value;
+            queryParams.q = dataGridState.filters[0].value;
           }
 
           if (typeof dataGridState.page !== 'undefined') {
@@ -70,15 +70,10 @@ export class IndexComponent implements OnInit {
       ;
 
     this._response$ = this._activatedRoute.queryParams.pipe(
-      filter(queryParams => Object.keys(queryParams).length > 0 && typeof queryParams.username !== 'undefined'),
+      filter(queryParams => Object.keys(queryParams).length > 0 && typeof queryParams.q !== 'undefined'),
 
       switchMap(queryParams => {
-        let params = new HttpParams();
-        params = params.append('q', queryParams.username);
-        params = params.append('page', queryParams.page);
-        params = params.append('per_page', queryParams.limit);
-
-        return this._httpClient.get<GitHubUserSearchResults>('https://api.github.com/search/users', { params }).pipe(
+        return this._githubApiService.getUsers(queryParams as GitHubUserQueryParams).pipe(
           catchError(() => of<GitHubUserSearchResults>({
             total_count: 0,
             incomplete_results: false,
