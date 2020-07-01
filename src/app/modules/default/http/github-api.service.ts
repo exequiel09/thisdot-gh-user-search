@@ -38,13 +38,20 @@ export class GithubApiService {
         // parse link http header to get the possible total number of entities requested.
         // the example of use case is starred count is not provided directly in the users endpoint so we
         // cleverly get the total count by requesting specified end point and limiting the results to 1.
-        const [, lastSegment] = (response.headers.get('link') as string).split(',');
-        const [lastUrl, ] = trim(lastSegment).split(';');
-        const parsedLastUrl = new URL(trim(lastUrl, '<>'));
+        let totalCount = 0;
+        const link = response.headers.get('link');
+
+        if (link !== null) {
+          const [, lastSegment] = (response.headers.get('link') as string).split(',');
+          const [lastUrl,] = trim(lastSegment).split(';');
+          const parsedLastUrl = new URL(trim(lastUrl, '<>'));
+
+          totalCount = +(parsedLastUrl.searchParams.get('page') ?? '0');
+        }
 
         return {
           incomplete_results: false,
-          total_count: +(parsedLastUrl.searchParams.get('page') ?? '1'),
+          total_count: totalCount,
           items: [...(response.body as Record<string, string>[])],
         };
       })
