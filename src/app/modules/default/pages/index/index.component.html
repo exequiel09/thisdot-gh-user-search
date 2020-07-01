@@ -1,4 +1,4 @@
-<clr-datagrid (clrDgRefresh)="refreshDataGrid($event)">
+<clr-datagrid (clrDgRefresh)="refreshDataGrid($event)" [clrDgLoading]="loading">
   <clr-dg-column [clrDgField]="'login'">Username</clr-dg-column>
 
   <clr-dg-placeholder>We couldn't find any users!</clr-dg-placeholder>

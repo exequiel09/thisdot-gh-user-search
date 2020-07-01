@@ -28,6 +28,7 @@ import { GithubApiService, GitHubUserQueryParams } from '../../http/github-api.s
 export class IndexComponent implements OnInit {
   page = 1;
   perPage = 20;
+  loading = false;
   user$: Observable<GitHubUserSearchResultItem[]>;
   totalItem$: Observable<number>;
   refreshDataGrid$: Observable<ClrDatagridStateInterface>;
@@ -87,13 +88,23 @@ export class IndexComponent implements OnInit {
     this._response$ = this._activatedRoute.queryParams.pipe(
       filter(queryParams => Object.keys(queryParams).length > 0 && typeof queryParams.q !== 'undefined'),
 
+      tap(() => {
+        this.loading = true;
+        this._cdr.markForCheck();
+      }),
+
       switchMap(queryParams => {
         return this._githubApiService.getUsers(queryParams as GitHubUserQueryParams).pipe(
           catchError(() => of<GitHubUserSearchResults>({
             total_count: 0,
             incomplete_results: false,
             items: [],
-          }))
+          })),
+
+          tap(() => {
+            this.loading = false;
+            this._cdr.markForCheck();
+          }),
         );
       }),
 
