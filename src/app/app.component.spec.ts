@@ -1,7 +1,6 @@
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { async, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-
-import { ClarityModule } from '@clr/angular';
 
 import { AppComponent } from './app.component';
 
@@ -10,7 +9,9 @@ describe('AppComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
-        ClarityModule,
+      ],
+      schemas: [
+        NO_ERRORS_SCHEMA
       ],
       declarations: [
         AppComponent
