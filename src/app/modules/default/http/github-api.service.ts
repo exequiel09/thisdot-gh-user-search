@@ -6,6 +6,8 @@ import trim from 'lodash-es/trim';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { environment } from '@thisdot-gh-user-search/environment';
+
 import { GitHubApiQueryParams, GitHubSearchResults, GitHubUser, GitHubUserSearchResults } from '../models/github-api.model';
 
 @Injectable({
@@ -21,8 +23,7 @@ export class GithubApiService {
     params = params.append('page', queryParams.page.toString());
     params = params.append('per_page', queryParams.limit.toString());
 
-    // TODO: move this in a configuration file
-    return this._httpClient.get<GitHubUserSearchResults>('https://api.github.com/search/users', { params });
+    return this._httpClient.get<GitHubUserSearchResults>(`${environment.api.gitHubSearch}/users`, { params });
   }
 
   getUser(url: string): Observable<GitHubUser> {
