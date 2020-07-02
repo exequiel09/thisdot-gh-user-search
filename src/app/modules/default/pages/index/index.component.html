@@ -9,9 +9,8 @@
       <a class="action-item" rel="noreferrer noopener" target="_blank" [href]="user.url">View in GitHub API</a>
     </clr-dg-action-overflow>
     <clr-dg-cell>
-      <!-- TODO: create styles for this. extract -->
-      <img [src]="user.avatar_url" [style.maxWidth.px]="50" />
-      <a [href]="user.html_url" rel="noreferrer noopener" target="_blank" style="display: inline-block; margin-left: 1rem;">
+      <img class="user-avatar -small" [src]="user.avatar_url" />
+      <a class="d-inline-block ml-3" rel="noreferrer noopener" target="_blank" [href]="user.html_url">
         {{ user.login }}
       </a>
     </clr-dg-cell>
