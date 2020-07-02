@@ -43,7 +43,6 @@ jobs:
         run: npm run lint
 
       - name: Build and Deploy project
-        id: last-test-sha
         run: |
           if [[ $GITHUB_BASE_REF ]]
           then
@@ -51,7 +50,7 @@ jobs:
             npm run build
           else
             echo "Buiding and Deploying project!"
-            npm run deploy
+            npm run deploy -- --repo=https://${{ secrets.GH_TOKEN }}@github.com/exequiel09/thisdot-gh-user-search.git --name="${{ secrets.GH_DEPLOYER_NAME }}" --email=${{ secrets.GH_DEPLOYER_EMAIL }}
           fi
 
 
