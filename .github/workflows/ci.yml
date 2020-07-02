@@ -36,13 +36,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - run: npm ci --ignore-scripts
+      - run: npm ci
       - run: npm run ng version
 
       - name: Lint project
         run: npm run lint
 
-      - name: Build affected projects
-        run: npm run build -- --prod
+      - name: Build and Deploy project
+        id: last-test-sha
+        run: |
+          if [[ $GITHUB_BASE_REF ]]
+          then
+            echo "Skipping deployment since this action is triggered via a PR!"
+            npm run build
+          else
+            echo "Buiding and Deploying project!"
+            npm run deploy
+          fi
 
 
