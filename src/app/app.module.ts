@@ -4,6 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { ClarityModule } from '@clr/angular';
+import { HttpCacheInterceptorModule } from '@ngneat/cashew';
 
 import { DefaultModule } from './modules/default';
 import { AppRoutingModule } from './app-routing.module';
@@ -19,6 +20,9 @@ import { AppComponent } from './app.component';
     HttpClientModule,
 
     ClarityModule,
+    HttpCacheInterceptorModule.forRoot({
+      strategy: 'explicit',
+    }),
 
     DefaultModule,
     AppRoutingModule,

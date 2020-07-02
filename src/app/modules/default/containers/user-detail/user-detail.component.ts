@@ -2,12 +2,24 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { forkJoin, merge, Observable, of, Subject } from 'rxjs';
-import { catchError, map, takeUntil, tap } from 'rxjs/operators';
+import { catchError, map, shareReplay, takeUntil, tap } from 'rxjs/operators';
 import { retryBackoff, RetryBackoffConfig } from 'backoff-rxjs';
 
 import { GitHubUser, GitHubUserSearchResultItem } from '../../models/github-api.model';
 import { GithubApiService } from '../../http/github-api.service';
 import { stripGhUrlParams } from '../../utils';
+
+const backoffConfig: RetryBackoffConfig = {
+  initialInterval: 60,
+  maxRetries: 12,
+  shouldRetry: (error: HttpErrorResponse) => {
+    if (error.status === 403 && error.statusText.trim().toLowerCase() === 'rate limit exceeded') {
+      return false;
+    }
+
+    return true;
+  }
+};
 
 @Component({
   selector: 'tdgh-user-detail',
@@ -30,8 +42,8 @@ export class UserDetailComponent implements OnDestroy, OnInit {
     private readonly _cdr: ChangeDetectorRef,
     private readonly _githubApiService: GithubApiService
   ) {
-    this.errored$ = this._errored$.asObservable();
-    this.info$ = this._info$.asObservable();
+    this.errored$ = this._errored$.asObservable().pipe(shareReplay(1));
+    this.info$ = this._info$.asObservable().pipe(shareReplay(1));
 
     merge(this.info$, this.errored$)
       .pipe(
@@ -47,24 +59,15 @@ export class UserDetailComponent implements OnDestroy, OnInit {
   }
 
   ngOnDestroy(): void {
+    this._errored$.complete();
+    this._info$.complete();
+
     // push a notification value to terminate existing subscribers and complete the subject immediately
     this._unsubscribe$.next();
     this._unsubscribe$.complete();
   }
 
   ngOnInit(): void {
-    const backoffConfig: RetryBackoffConfig = {
-      initialInterval: 60,
-      maxRetries: 12,
-      shouldRetry: (error: HttpErrorResponse) => {
-        if (error.status === 403 && error.statusText.trim().toLowerCase() === 'rate limit exceeded') {
-          return false;
-        }
-
-        return true;
-      }
-    };
-
     const user$ = this._githubApiService.getUser(this.user.url).pipe(
       retryBackoff(backoffConfig)
     );
