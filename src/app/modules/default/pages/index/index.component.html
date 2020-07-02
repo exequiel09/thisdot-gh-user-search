@@ -4,7 +4,12 @@
   <clr-dg-placeholder>We couldn't find any users!</clr-dg-placeholder>
 
   <clr-dg-row *ngFor="let user of (user$ | async); trackBy: trackByUser">
-    <clr-dg-cell>{{ user.login }}</clr-dg-cell>
+    <clr-dg-cell>
+      <!-- TODO: create styles for this. extract -->
+      <img [src]="user.avatar_url" [style.maxWidth.px]="50" />
+      <span style="display: inline-block; margin-left: 1rem;">{{ user.login }}</span>
+    </clr-dg-cell>
+    <tdgh-user-detail [user]="user" ngProjectAs="clr-dg-row-detail" *clrIfExpanded></tdgh-user-detail>
   </clr-dg-row>
 
   <clr-dg-footer>
@@ -13,7 +18,7 @@
       [clrDgTotalItems]="totalItem$ | async"
       #pagination>
       <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">Users per page</clr-dg-page-size>
-      {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
+      {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }}
       of {{ pagination.totalItems }} users
     </clr-dg-pagination>
   </clr-dg-footer>

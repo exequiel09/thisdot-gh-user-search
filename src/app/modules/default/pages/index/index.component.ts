@@ -17,8 +17,8 @@ import {
   withLatestFrom
 } from 'rxjs/operators';
 
-import { GitHubUserSearchResultItem, GitHubUserSearchResults } from '../../models/github-users.model';
-import { GithubApiService, GitHubUserQueryParams } from '../../http/github-api.service';
+import { GitHubApiQueryParams, GitHubUserSearchResultItem, GitHubUserSearchResults } from '../../models/github-api.model';
+import { GithubApiService } from '../../http/github-api.service';
 
 @Component({
   templateUrl: './index.component.html',
@@ -53,7 +53,7 @@ export class IndexComponent implements OnInit {
         withLatestFrom(this._activatedRoute.queryParams),
 
         map(([dataGridState, queryParams]) => {
-          const newQueryParams: Partial<GitHubUserQueryParams> = {};
+          const newQueryParams: Partial<GitHubApiQueryParams> = {};
 
           if (typeof dataGridState.filters !== 'undefined' && dataGridState.filters.length > 0) {
             newQueryParams.q = dataGridState.filters[0].value;
@@ -94,7 +94,7 @@ export class IndexComponent implements OnInit {
       }),
 
       switchMap(queryParams => {
-        return this._githubApiService.getUsers(queryParams as GitHubUserQueryParams).pipe(
+        return this._githubApiService.getUsers(queryParams as GitHubApiQueryParams).pipe(
           catchError(() => of<GitHubUserSearchResults>({
             total_count: 0,
             incomplete_results: false,
