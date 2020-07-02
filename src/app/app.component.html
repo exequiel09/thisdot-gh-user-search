@@ -7,6 +7,12 @@
         <span class="title clr-hidden-sm-up">GH</span>
       </a>
     </div>
+
+    <form class="search" (submit)="false">
+      <label for="search_input">
+        <input id="search_input" type="text" placeholder="Search for users..." (keyup)="onSearch($event)" />
+      </label>
+    </form>
   </clr-header>
 
   <div class="content-container">

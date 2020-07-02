@@ -86,7 +86,9 @@ export class IndexComponent implements OnInit {
       ;
 
     this._response$ = this._activatedRoute.queryParams.pipe(
-      filter(queryParams => Object.keys(queryParams).length > 0 && typeof queryParams.q !== 'undefined'),
+      filter(queryParams => {
+        return Object.keys(queryParams).length > 0 && typeof queryParams.q !== 'undefined' && queryParams.q.trim() !== '';
+      }),
 
       tap(() => {
         this.loading = true;
