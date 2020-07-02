@@ -43,7 +43,7 @@ jobs:
         run: npm run lint
 
       - name: Run Tests
-        run: npm run test
+        run: npm run test -- --watch=false
 
       - name: Build and Deploy project
         run: |
