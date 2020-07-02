@@ -28,10 +28,10 @@ export class GithubApiService {
     return this._httpClient.get<GitHubUser>(url);
   }
 
-  getPreformattedPaginatedData(url: string, queryParams: Partial<GitHubApiQueryParams> = {}): Observable<GitHubSearchResults> {
+  getPreformattedPaginatedData(url: string): Observable<GitHubSearchResults> {
     // assemble the necessary http query parameters for the request
     let params = new HttpParams();
-    Object.entries(queryParams).forEach(item => params = params.append(item[0], item[1] as string));
+    params = params.append('per_page', '1');
 
     return this._httpClient.get(url, { params, observe: 'response' }).pipe(
       map(response => {
