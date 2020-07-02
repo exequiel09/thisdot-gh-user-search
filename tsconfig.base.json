@@ -19,7 +19,13 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "@thisdot-gh-user-search/*": [
+        "./src/app/*",
+        "./src/environments/*"
+      ]
+    },
   },
   "angularCompilerOptions": {
     "strictInjectionParameters": true

@@ -1,7 +1,50 @@
-/* You can add global styles to this file, and also import other style files */
+@import 'styles/vendor';
+
+// [resets] ::start
 
 dt { font-weight: 700; }
 
 dd { margin-left: 0; }
+
+// [resets] ::end
+
+// [utilities] ::start
+
+// NOTE: extracted some bootstrap spacing utilities since VMWare Clarity spacing utilities are still experimental
+.mt-0,
+.my-0 {
+  margin-top: 0 !important;
+}
+
+.ml-3,
+.mx-3 {
+  margin-left: 1rem !important;
+}
+
+.mb-3,
+.my-3 {
+  margin-bottom: 1rem !important;
+}
+
+.d-inline-block {
+  display: inline-block !important;
+}
+
+// [utilities] ::end
+
+// [components] ::start
+
+.user-avatar {
+  max-width: 150px;
+
+  &.-small { max-width: 50px; }
+}
+
+.row-detail {
+  width: 100%;
+  padding: 0.55rem 0.6rem 0.55rem;
+}
+
+// [components] ::end
 
 

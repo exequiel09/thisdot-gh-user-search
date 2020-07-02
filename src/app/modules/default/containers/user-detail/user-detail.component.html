@@ -1,23 +1,20 @@
 <div [clrLoading]="loading">
   <clr-dg-row-detail [clrDgReplace]="true">
-    <!-- TODO: create styles for this. extract -->
-    <div class="clr-row" style="padding: .55rem .6rem .55rem; width: 100%;">
+    <div class="clr-row row-detail">
       <div class="clr-col-12 clr-col-md-3">
-        <img [src]="user.avatar_url" [style.maxWidth.px]="150" />
+        <img class="user-avatar" [src]="user.avatar_url" />
       </div>
 
       <div class="clr-col-12 clr-col-md-9">
-        <!-- TODO: create styles for this. extract -->
         <ng-container *ngIf="(errored$ | async) as errored">
-          <clr-alert [clrAlertType]="'danger'" style="margin-bottom: 1rem;" *ngIf="errored">
+          <clr-alert [clrAlertType]="'danger'" class="mb-3" *ngIf="errored">
             <clr-alert-item>
               <span class="alert-text">Fetching user details failed.</span>
             </clr-alert-item>
           </clr-alert>
         </ng-container>
 
-        <!-- TODO: create styles for this. extract -->
-        <dl class="clr-row" style="margin-top: 0;" *ngIf="(info$ | async) as user">
+        <dl class="clr-row mt-0" *ngIf="(info$ | async) as user">
           <ng-container *ngIf="!!user?.name">
             <dt class="clr-col-sm-3">Name</dt>
             <dd class="clr-col-sm-9">{{ user?.name }}</dd>
