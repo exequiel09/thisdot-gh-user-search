@@ -48,10 +48,13 @@ export class IndexComponent implements OnInit {
       .pipe(
         auditTime(500),
 
+        // use the lodash's isEqual function to check whether the emitted datagrid state is the same as previous
+        // emission or not and ignore if it's the same
         distinctUntilChanged<ClrDatagridStateInterface>(isEqual),
 
         withLatestFrom(this._activatedRoute.queryParams),
 
+        // transform the datagrid state into an object of query params
         map(([dataGridState, queryParams]) => {
           const newQueryParams: Partial<GitHubApiQueryParams> = {};
 
@@ -69,6 +72,9 @@ export class IndexComponent implements OnInit {
           return newQueryParams;
         }),
 
+        // perform a side-effect to reflect the new property values for `page` and `perPage` and
+        // mark the component for check to check any changes during next CD run since the component's
+        // change detection strategy is set to OnPush
         tap(queryParams => {
           this.page = (queryParams.page as number) ?? 1;
           this.perPage = (queryParams.limit as number) ?? 20;
@@ -85,16 +91,22 @@ export class IndexComponent implements OnInit {
       })
       ;
 
+    // Use the query strings as the source of truth for datagrid state which enables us to request the users
+    // on page load when the correct query parameters are in place.
     this._response$ = this._activatedRoute.queryParams.pipe(
       filter(queryParams => {
         return Object.keys(queryParams).length > 0 && typeof queryParams.q !== 'undefined' && queryParams.q.trim() !== '';
       }),
 
+      // show the loading indicator in the datagrid by setting `loading` property to true and
+      // mark the component for check to check any changes during next CD run since the component's
+      // change detection strategy is set to OnPush
       tap(() => {
         this.loading = true;
         this._cdr.markForCheck();
       }),
 
+      // map an inner observable that fetches users from GitHub Search API
       switchMap(queryParams => {
         return this._githubApiService.getUsers(queryParams as GitHubApiQueryParams).pipe(
           catchError(() => of<GitHubUserSearchResults>({
@@ -103,6 +115,7 @@ export class IndexComponent implements OnInit {
             items: [],
           })),
 
+          // hide the loading indicator in the datagrid by setting `loading` property to true
           tap(() => {
             this.loading = false;
             this._cdr.markForCheck();
@@ -110,6 +123,7 @@ export class IndexComponent implements OnInit {
         );
       }),
 
+      // finally, replay any previously emitted values upon subscription
       shareReplay({
         bufferSize: 1,
         refCount: true,

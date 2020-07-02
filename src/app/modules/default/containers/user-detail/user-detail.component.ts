@@ -11,7 +11,7 @@ import { stripGhUrlParams } from '../../utils';
 
 const backoffConfig: RetryBackoffConfig = {
   initialInterval: 60,
-  maxRetries: 12,
+  maxRetries: 3,
   shouldRetry: (error: HttpErrorResponse) => {
     if (error.status === 403 && error.statusText.trim().toLowerCase() === 'rate limit exceeded') {
       return false;
@@ -47,11 +47,15 @@ export class UserDetailComponent implements OnDestroy, OnInit {
 
     merge(this.info$, this.errored$)
       .pipe(
+        // disable the loading spinner once the request has been finished regardless
+        // the result of the fetch operation
         tap(() => {
           this.loading = false;
           this._cdr.markForCheck();
         }),
 
+        // terminate the subscription once the source observable/subject emits a value
+        // in this case, when the component is destroyed
         takeUntil(this._unsubscribe$)
       )
       .subscribe()
@@ -76,6 +80,7 @@ export class UserDetailComponent implements OnDestroy, OnInit {
       retryBackoff(backoffConfig)
     );
 
+    // Fetch user information and the star count of the user provided in the component's input
     forkJoin([user$, starred$])
       .pipe(
         map(([user, stars]) => {
@@ -87,6 +92,8 @@ export class UserDetailComponent implements OnDestroy, OnInit {
 
         catchError(() => of(null)),
 
+        // terminate the subscription once the source observable/subject emits a value
+        // in this case, when the component is destroyed
         takeUntil(this._unsubscribe$)
       )
       .subscribe(info => {
