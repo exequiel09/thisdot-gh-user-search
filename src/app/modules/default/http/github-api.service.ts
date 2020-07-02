@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { withCache } from '@ngneat/cashew';
-import trim from 'lodash-es/trim';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { environment } from '@thisdot-gh-user-search/environment';
 
+import { parseLinkHeaderForCount } from '../utils';
 import { GitHubApiQueryParams, GitHubSearchResults, GitHubUser, GitHubUserSearchResults } from '../models/github-api.model';
 
 @Injectable({
@@ -45,16 +45,7 @@ export class GithubApiService {
         // parse link http header to get the possible total number of entities requested.
         // the example of use case is starred count is not provided directly in the users endpoint so we
         // cleverly get the total count by requesting specified end point and limiting the results to 1.
-        let totalCount = 0;
-        const link = response.headers.get('link');
-
-        if (link !== null) {
-          const [, lastSegment] = (response.headers.get('link') as string).split(',');
-          const [lastUrl, ] = trim(lastSegment).split(';');
-          const parsedLastUrl = new URL(trim(lastUrl, '<>'));
-
-          totalCount = +(parsedLastUrl.searchParams.get('page') ?? '0');
-        }
+        const totalCount = parseLinkHeaderForCount(response.headers.get('link'));
 
         return {
           incomplete_results: false,
