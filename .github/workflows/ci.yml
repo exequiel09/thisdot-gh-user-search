@@ -36,46 +36,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run ng version
-
-      # From <https://stackoverflow.com/a/60478051/12842750>
-      - name: Retrieve last commit sha hash
-        id: last-test-sha
-        run: |
-          if [[ $GITHUB_BASE_REF ]]
-          then
-            echo "::set-output name=sha::remotes/origin/$GITHUB_BASE_REF"
-          else
-            echo "::set-output name=sha::$(git rev-parse HEAD~1)"
-          fi
-
-      - name: Get list of changed files (branch)
-        id: get-branch-changed-files
-        run: |
-          echo "::set-output name=files::$(git diff ${{ steps.last-test-sha.outputs.sha }}...${{ github.sha }} --name-only --diff-filter=M | xargs)"
-
-      - name: Get list of changed files (commit)
-        id: get-commit-changed-files
-        run: |
-          echo "::set-output name=files::$(git diff --name-only --diff-filter=M | xargs)"
-
-      - name: Run postinstall ngcc
-        id: run-postinstall-ngcc
-        run: |
-          CHANGED_FILES="${{ steps.get-branch-changed-files.outputs.files }}"
-          if [[ "$CHANGED_FILES" == *"package.json"* || "$CHANGED_FILES" == *"package-lock.json"* ]]
-          then
-              echo "Running ngcc postinstall hook"
-              npm run postinstall
-          else
-              echo "Skipping postinstall"
-          fi
 
       - name: Lint project
         run: npm run lint
 
       - name: Build affected projects
-        run: npm run build
+        run: npm run build -- --prod
 
 
