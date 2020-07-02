@@ -4,10 +4,16 @@
   <clr-dg-placeholder>We couldn't find any users!</clr-dg-placeholder>
 
   <clr-dg-row *ngFor="let user of (user$ | async); trackBy: trackByUser">
+    <clr-dg-action-overflow>
+      <a class="action-item" rel="noreferrer noopener" target="_blank" [href]="user.html_url">View in GitHub</a>
+      <a class="action-item" rel="noreferrer noopener" target="_blank" [href]="user.url">View in GitHub API</a>
+    </clr-dg-action-overflow>
     <clr-dg-cell>
       <!-- TODO: create styles for this. extract -->
       <img [src]="user.avatar_url" [style.maxWidth.px]="50" />
-      <span style="display: inline-block; margin-left: 1rem;">{{ user.login }}</span>
+      <a [href]="user.html_url" rel="noreferrer noopener" target="_blank" style="display: inline-block; margin-left: 1rem;">
+        {{ user.login }}
+      </a>
     </clr-dg-cell>
     <tdgh-user-detail [user]="user" ngProjectAs="clr-dg-row-detail" *clrIfExpanded></tdgh-user-detail>
   </clr-dg-row>
