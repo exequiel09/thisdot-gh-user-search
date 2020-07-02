@@ -1,6 +1,8 @@
-# ThisdotGhUserSearch
+# This Dot GitHub User Search App
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 10.0.0.
+
+This project is my submission for the coding challenge for Software Engineer application at [This Dot, Inc](https://www.thisdot.co/).
 
 ## Development server
 
