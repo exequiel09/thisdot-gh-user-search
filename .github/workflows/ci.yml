@@ -42,6 +42,9 @@ jobs:
       - name: Lint project
         run: npm run lint
 
+      - name: Run Tests
+        run: npm run test
+
       - name: Build and Deploy project
         run: |
           if [[ $GITHUB_BASE_REF ]]
