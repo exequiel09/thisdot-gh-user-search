@@ -108,7 +108,17 @@ export class IndexComponent implements OnInit {
 
       // map an inner observable that fetches users from GitHub Search API
       switchMap(queryParams => {
-        return this._githubApiService.getUsers(queryParams as GitHubApiQueryParams).pipe(
+        const validatedQueryParams = { ...queryParams };
+
+        if (typeof validatedQueryParams.page === 'undefined') {
+          validatedQueryParams.page = this.page;
+        }
+
+        if (typeof validatedQueryParams.limit === 'undefined') {
+          validatedQueryParams.limit = this.perPage;
+        }
+
+        return this._githubApiService.getUsers(validatedQueryParams as GitHubApiQueryParams).pipe(
           catchError(() => of<GitHubUserSearchResults>({
             total_count: 0,
             incomplete_results: false,
