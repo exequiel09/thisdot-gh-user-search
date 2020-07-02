@@ -6,7 +6,7 @@ import trim from 'lodash-es/trim';
  * @param url string
  */
 export function stripGhUrlParams(url: string): string {
-  return url.replace(/\{\/[a-z0-9]+\}/g, '');
+  return url.replace(/\{\/[a-z0-9\_]+\}/g, '');
 }
 
 /**
