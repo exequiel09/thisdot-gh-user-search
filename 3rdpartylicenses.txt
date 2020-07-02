@@ -22,9 +22,6 @@ MIT
 @clr/icons
 MIT
 
-@clr/ui
-MIT
-
 @ngneat/cashew
 MIT
 
