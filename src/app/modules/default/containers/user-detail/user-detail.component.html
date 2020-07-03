@@ -1,5 +1,5 @@
 <div [clrLoading]="loading">
-  <clr-dg-row-detail [clrDgReplace]="true">
+  <clr-dg-row-detail *clrIfExpanded [clrDgReplace]="true">
     <div class="clr-row row-detail">
       <div class="clr-col-12 clr-col-md-3">
         <img class="user-avatar" [src]="user.avatar_url" />
@@ -7,7 +7,7 @@
 
       <div class="clr-col-12 clr-col-md-9">
         <ng-container *ngIf="(errored$ | async) as errored">
-          <clr-alert [clrAlertType]="'danger'" class="mb-3" *ngIf="errored">
+          <clr-alert [clrAlertType]="'danger'" [clrAlertClosable]="false" class="mb-3" *ngIf="errored">
             <clr-alert-item>
               <span class="alert-text">Fetching user details failed.</span>
             </clr-alert-item>
@@ -15,20 +15,14 @@
         </ng-container>
 
         <dl class="clr-row mt-0" *ngIf="(info$ | async) as user">
-          <ng-container *ngIf="!!user?.name">
-            <dt class="clr-col-sm-3">Name</dt>
-            <dd class="clr-col-sm-9">{{ user?.name }}</dd>
-          </ng-container>
+          <dt class="clr-col-sm-3">Name</dt>
+          <dd class="clr-col-sm-9">{{ user?.name | defaultValue:'N/A' }}</dd>
 
-          <ng-container *ngIf="!!user?.location">
-            <dt class="clr-col-sm-3">Location</dt>
-            <dd class="clr-col-sm-9">{{ user?.location }}</dd>
-          </ng-container>
+          <dt class="clr-col-sm-3">Location</dt>
+          <dd class="clr-col-sm-9">{{ user?.location | defaultValue:'N/A' }}</dd>
 
-          <ng-container *ngIf="!!user?.company">
-            <dt class="clr-col-sm-3">Company</dt>
-            <dd class="clr-col-sm-9">{{ user?.company }}</dd>
-          </ng-container>
+          <dt class="clr-col-sm-3">Company</dt>
+          <dd class="clr-col-sm-9">{{ user?.company | defaultValue:'N/A' }}</dd>
 
           <ng-container *ngIf="!!user?.bio">
             <dt class="clr-col-sm-3">Bio</dt>
