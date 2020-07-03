@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -27,7 +27,7 @@ import { GithubApiService } from '../../http/github-api.service';
   styleUrls: ['./index.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class IndexComponent implements OnInit {
+export class IndexComponent {
   page = 1;
   perPage = 20;
   loading = false;
@@ -81,16 +81,6 @@ export class IndexComponent implements OnInit {
           return newQueryParams;
         }),
 
-        // perform a side-effect to reflect the new property values for `page` and `perPage` and
-        // mark the component for check to check any changes during next CD run since the component's
-        // change detection strategy is set to OnPush
-        tap(queryParams => {
-          this.page = (queryParams.page as number) ?? 1;
-          this.perPage = (queryParams.limit as number) ?? 20;
-
-          this._cdr.markForCheck();
-        }),
-
         filter(queryParams => Object.keys(queryParams).length > 0)
       )
       .subscribe(queryParams => {
@@ -107,11 +97,15 @@ export class IndexComponent implements OnInit {
         return Object.keys(queryParams).length > 0 && typeof queryParams.q !== 'undefined' && queryParams.q.trim() !== '';
       }),
 
+      // perform a side-effect to reflect the new property values for `page` and `perPage`,
       // show the loading indicator in the datagrid by setting `loading` property to true and
       // mark the component for check to check any changes during next CD run since the component's
       // change detection strategy is set to OnPush
-      tap(() => {
+      tap(queryParams => {
+        this.page = +((queryParams.page as number) ?? '1');
+        this.perPage = +((queryParams.limit as number) ?? '20');
         this.loading = true;
+
         this._cdr.markForCheck();
       }),
 
@@ -172,8 +166,6 @@ export class IndexComponent implements OnInit {
     this.user$ = this._response$.pipe(pluck('items'));
     this.totalItem$ = this._response$.pipe(pluck('total_count'));
   }
-
-  ngOnInit(): void { }
 
   refreshDataGrid(state: ClrDatagridStateInterface): void {
     this._refreshDataGrid$.next(state);
