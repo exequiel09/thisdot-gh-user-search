@@ -12,6 +12,7 @@ import {
   map,
   pluck,
   shareReplay,
+  skip,
   switchMap,
   tap,
   withLatestFrom
@@ -46,6 +47,8 @@ export class IndexComponent implements OnInit {
 
     this.refreshDataGrid$
       .pipe(
+        skip(1),
+
         auditTime(500),
 
         // use the lodash's isEqual function to check whether the emitted datagrid state is the same as previous
