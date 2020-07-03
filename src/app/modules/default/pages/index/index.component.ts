@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { ClrDatagridStateInterface } from '@clr/angular';
 import isEqual from 'lodash-es/isEqual';
@@ -12,6 +13,7 @@ import {
   map,
   pluck,
   shareReplay,
+  skip,
   switchMap,
   tap,
   withLatestFrom
@@ -25,16 +27,20 @@ import { GithubApiService } from '../../http/github-api.service';
   styleUrls: ['./index.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class IndexComponent implements OnInit {
+export class IndexComponent {
   page = 1;
   perPage = 20;
   loading = false;
+  error$: Observable<string | null>;
   user$: Observable<GitHubUserSearchResultItem[]>;
   totalItem$: Observable<number>;
   refreshDataGrid$: Observable<ClrDatagridStateInterface>;
 
   private readonly _response$: Observable<GitHubUserSearchResults>;
+  private readonly _error$ = new Subject<string | null>();
   private readonly _refreshDataGrid$ = new Subject<ClrDatagridStateInterface>();
+  // NOTE: used to track the previous successful search request total number of items
+  private _previousSuccessfulTotalItems: number | null = null;
 
   constructor(
     private readonly _activatedRoute: ActivatedRoute,
@@ -42,10 +48,13 @@ export class IndexComponent implements OnInit {
     private readonly _router: Router,
     private readonly _githubApiService: GithubApiService
   ) {
+    this.error$ = this._error$.asObservable();
     this.refreshDataGrid$ = this._refreshDataGrid$.asObservable();
 
     this.refreshDataGrid$
       .pipe(
+        skip(1),
+
         auditTime(500),
 
         // use the lodash's isEqual function to check whether the emitted datagrid state is the same as previous
@@ -72,16 +81,6 @@ export class IndexComponent implements OnInit {
           return newQueryParams;
         }),
 
-        // perform a side-effect to reflect the new property values for `page` and `perPage` and
-        // mark the component for check to check any changes during next CD run since the component's
-        // change detection strategy is set to OnPush
-        tap(queryParams => {
-          this.page = (queryParams.page as number) ?? 1;
-          this.perPage = (queryParams.limit as number) ?? 20;
-
-          this._cdr.markForCheck();
-        }),
-
         filter(queryParams => Object.keys(queryParams).length > 0)
       )
       .subscribe(queryParams => {
@@ -98,11 +97,15 @@ export class IndexComponent implements OnInit {
         return Object.keys(queryParams).length > 0 && typeof queryParams.q !== 'undefined' && queryParams.q.trim() !== '';
       }),
 
+      // perform a side-effect to reflect the new property values for `page` and `perPage`,
       // show the loading indicator in the datagrid by setting `loading` property to true and
       // mark the component for check to check any changes during next CD run since the component's
       // change detection strategy is set to OnPush
-      tap(() => {
+      tap(queryParams => {
+        this.page = +((queryParams.page as number) ?? '1');
+        this.perPage = +((queryParams.limit as number) ?? '20');
         this.loading = true;
+
         this._cdr.markForCheck();
       }),
 
@@ -119,18 +122,38 @@ export class IndexComponent implements OnInit {
         }
 
         return this._githubApiService.getUsers(validatedQueryParams as GitHubApiQueryParams).pipe(
-          catchError(() => of<GitHubUserSearchResults>({
-            total_count: 0,
-            incomplete_results: false,
-            items: [],
-          })),
+          tap(result => {
+            // save the current request's total_count property
+            this._previousSuccessfulTotalItems = result.total_count;
 
-          // hide the loading indicator in the datagrid by setting `loading` property to true
-          tap(() => {
-            this.loading = false;
-            this._cdr.markForCheck();
+            // remove any error messages displayed to the user
+            this._error$.next(null);
+          }),
+
+          catchError((err: HttpErrorResponse) => {
+            if (err.status === 403) {
+              this._error$.next('Reached GitHub\'s rate limit. Please try again later');
+            }
+
+            if (err.status === 422) {
+              this._error$.next(err.error.message);
+            }
+
+            // NOTE: use the previous successful request's total items to prevent the datagrid to fire another
+            //       state changes.
+            return of<GitHubUserSearchResults>({
+              total_count: this._previousSuccessfulTotalItems as number,
+              incomplete_results: false,
+              items: [],
+            });
           }),
         );
+      }),
+
+      // hide the loading indicator in the datagrid by setting `loading` property to true
+      tap(() => {
+        this.loading = false;
+        this._cdr.markForCheck();
       }),
 
       // finally, replay any previously emitted values upon subscription
@@ -143,8 +166,6 @@ export class IndexComponent implements OnInit {
     this.user$ = this._response$.pipe(pluck('items'));
     this.totalItem$ = this._response$.pipe(pluck('total_count'));
   }
-
-  ngOnInit(): void { }
 
   refreshDataGrid(state: ClrDatagridStateInterface): void {
     this._refreshDataGrid$.next(state);

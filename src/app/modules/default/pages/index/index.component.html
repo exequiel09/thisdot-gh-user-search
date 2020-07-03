@@ -1,3 +1,11 @@
+<ng-container *ngIf="(error$ | async) as errorMessage">
+  <clr-alert [clrAlertType]="'danger'" [clrAlertClosable]="false" class="mb-3" *ngIf="!!errorMessage">
+    <clr-alert-item>
+      <span class="alert-text">{{ errorMessage }}</span>
+    </clr-alert-item>
+  </clr-alert>
+</ng-container>
+
 <clr-datagrid (clrDgRefresh)="refreshDataGrid($event)" [clrDgLoading]="loading">
   <clr-dg-column [clrDgField]="'login'">Username</clr-dg-column>
 
