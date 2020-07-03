@@ -1,25 +1,54 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
+import { createComponentFactory, Spectator } from '@ngneat/spectator';
+import { take } from 'rxjs/operators';
+
+import { GithubApiService } from '../../http/github-api.service';
+import { DUMMY_USERS_SEARCH_RESULTS, MockGithubApiService } from '../../testing';
+import { stripGhUrlParams } from '../../utils';
 import { UserDetailComponent } from './user-detail.component';
 
 describe('UserDetailComponent', () => {
-  let component: UserDetailComponent;
-  let fixture: ComponentFixture<UserDetailComponent>;
-
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ UserDetailComponent ]
-    })
-    .compileComponents();
-  }));
-
-  beforeEach(() => {
-    fixture = TestBed.createComponent(UserDetailComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+  let spectator: Spectator<UserDetailComponent>;
+  const createComponent = createComponentFactory({
+    component: UserDetailComponent,
+    detectChanges: false,
+    schemas: [
+      NO_ERRORS_SCHEMA,
+    ],
+    componentProviders: [
+      { provide: GithubApiService, useClass: MockGithubApiService },
+    ]
   });
+
+  beforeEach(() => spectator = createComponent());
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(spectator.component).toBeTruthy();
+  });
+
+  it('should call getUser and getPreformattedPaginatedData when change detection runs', (done) => {
+    const apiService = spectator.inject(GithubApiService, true);
+    const getUserSpy = spyOn(apiService, 'getUser').and.callThrough();
+    const getPreformattedPaginatedDataSpy = spyOn(apiService, 'getPreformattedPaginatedData').and.callThrough();
+
+    spectator.component.user = DUMMY_USERS_SEARCH_RESULTS.items[0];
+    spectator.detectChanges();
+
+    spectator.component.info$
+      .pipe(
+        take(1)
+      )
+      .subscribe(data => {
+        expect(data.url).toBe(spectator.component.user.url);
+        expect(data.stars).toBe(1);
+        done();
+      })
+      ;
+
+    expect(getUserSpy).toHaveBeenCalledWith(spectator.component.user.url);
+    expect(getPreformattedPaginatedDataSpy).toHaveBeenCalledWith(stripGhUrlParams(spectator.component.user.starred_url));
   });
 });
+
+

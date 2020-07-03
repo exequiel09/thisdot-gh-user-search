@@ -29,8 +29,8 @@ export interface BaseGitHubUser {
 
 export interface GitHubUser extends BaseGitHubUser {
   name: string;
-  company: string;
-  blog: string;
+  company: string | null;
+  blog: string | null;
   location: string;
   email: string | null;
   hireable: boolean;
