@@ -1,6 +1,18 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  QueryList,
+  SimpleChanges,
+  ViewChildren
+} from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 
+import { ClrDatagridRowDetail } from '@clr/angular';
 import { forkJoin, merge, Observable, of, Subject } from 'rxjs';
 import { catchError, map, shareReplay, takeUntil, tap } from 'rxjs/operators';
 import { retryBackoff, RetryBackoffConfig } from 'backoff-rxjs';
@@ -27,12 +39,13 @@ const backoffConfig: RetryBackoffConfig = {
   styleUrls: ['./user-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class UserDetailComponent implements OnDestroy, OnInit {
+export class UserDetailComponent implements OnChanges, OnDestroy, OnInit {
   loading = true;
   info$: Observable<GitHubUser>;
   errored$: Observable<boolean>;
 
   @Input() user!: GitHubUserSearchResultItem;
+  @ViewChildren(ClrDatagridRowDetail) detail!: QueryList<ClrDatagridRowDetail>;
 
   private readonly _errored$ = new Subject<boolean>();
   private readonly _info$ = new Subject<GitHubUser>();
@@ -60,6 +73,15 @@ export class UserDetailComponent implements OnDestroy, OnInit {
       )
       .subscribe()
       ;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // the ClrDatagridRowDetail component gets reused and remains open even if we navigate to the next page
+    // which shows outdated details. So when the user @input property value changes, we check if there is
+    // an existing ClrDatagridRowDetail component and we close it.
+    if (!!changes.user.currentValue && !!this.detail && this.detail.length > 0) {
+      this.detail.first.expand.expanded = false;
+    }
   }
 
   ngOnDestroy(): void {

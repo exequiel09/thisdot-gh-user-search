@@ -1,5 +1,5 @@
 <div [clrLoading]="loading">
-  <clr-dg-row-detail [clrDgReplace]="true">
+  <clr-dg-row-detail *clrIfExpanded [clrDgReplace]="true">
     <div class="clr-row row-detail">
       <div class="clr-col-12 clr-col-md-3">
         <img class="user-avatar" [src]="user.avatar_url" />
@@ -7,7 +7,7 @@
 
       <div class="clr-col-12 clr-col-md-9">
         <ng-container *ngIf="(errored$ | async) as errored">
-          <clr-alert [clrAlertType]="'danger'" class="mb-3" *ngIf="errored">
+          <clr-alert [clrAlertType]="'danger'" [clrAlertClosable]="false" class="mb-3" *ngIf="errored">
             <clr-alert-item>
               <span class="alert-text">Fetching user details failed.</span>
             </clr-alert-item>
