@@ -6,6 +6,7 @@ import { ClarityModule } from '@clr/angular';
 import { UrlPipe } from './pipes/url.pipe';
 import { IndexComponent } from './pages/index/index.component';
 import { UserDetailComponent } from './containers/user-detail/user-detail.component';
+import { DefaultValuePipe } from './pipes/default-value.pipe';
 
 @NgModule({
   imports: [
@@ -19,6 +20,8 @@ import { UserDetailComponent } from './containers/user-detail/user-detail.compon
     UserDetailComponent,
 
     UrlPipe,
+
+    DefaultValuePipe,
   ],
 })
 export class DefaultModule { }

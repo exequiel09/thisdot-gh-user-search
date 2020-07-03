@@ -6,6 +6,7 @@ import { take } from 'rxjs/operators';
 import { GithubApiService } from '../../http/github-api.service';
 import { DUMMY_USERS_SEARCH_RESULTS, MockGithubApiService } from '../../testing';
 import { stripGhUrlParams } from '../../utils';
+import { DefaultValuePipe } from '../../pipes/default-value.pipe';
 import { UserDetailComponent } from './user-detail.component';
 
 describe('UserDetailComponent', () => {
@@ -15,6 +16,9 @@ describe('UserDetailComponent', () => {
     detectChanges: false,
     schemas: [
       NO_ERRORS_SCHEMA,
+    ],
+    declarations: [
+      DefaultValuePipe,
     ],
     componentProviders: [
       { provide: GithubApiService, useClass: MockGithubApiService },
