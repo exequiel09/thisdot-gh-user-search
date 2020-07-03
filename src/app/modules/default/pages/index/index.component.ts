@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { ClrDatagridStateInterface } from '@clr/angular';
 import isEqual from 'lodash-es/isEqual';
@@ -30,12 +31,16 @@ export class IndexComponent implements OnInit {
   page = 1;
   perPage = 20;
   loading = false;
+  error$: Observable<string | null>;
   user$: Observable<GitHubUserSearchResultItem[]>;
   totalItem$: Observable<number>;
   refreshDataGrid$: Observable<ClrDatagridStateInterface>;
 
   private readonly _response$: Observable<GitHubUserSearchResults>;
+  private readonly _error$ = new Subject<string | null>();
   private readonly _refreshDataGrid$ = new Subject<ClrDatagridStateInterface>();
+  // NOTE: used to track the previous successful search request total number of items
+  private _previousSuccessfulTotalItems: number | null = null;
 
   constructor(
     private readonly _activatedRoute: ActivatedRoute,
@@ -43,6 +48,7 @@ export class IndexComponent implements OnInit {
     private readonly _router: Router,
     private readonly _githubApiService: GithubApiService
   ) {
+    this.error$ = this._error$.asObservable();
     this.refreshDataGrid$ = this._refreshDataGrid$.asObservable();
 
     this.refreshDataGrid$
@@ -122,18 +128,38 @@ export class IndexComponent implements OnInit {
         }
 
         return this._githubApiService.getUsers(validatedQueryParams as GitHubApiQueryParams).pipe(
-          catchError(() => of<GitHubUserSearchResults>({
-            total_count: 0,
-            incomplete_results: false,
-            items: [],
-          })),
+          tap(result => {
+            // save the current request's total_count property
+            this._previousSuccessfulTotalItems = result.total_count;
 
-          // hide the loading indicator in the datagrid by setting `loading` property to true
-          tap(() => {
-            this.loading = false;
-            this._cdr.markForCheck();
+            // remove any error messages displayed to the user
+            this._error$.next(null);
+          }),
+
+          catchError((err: HttpErrorResponse) => {
+            if (err.status === 403) {
+              this._error$.next('Reached GitHub\'s rate limit. Please try again later');
+            }
+
+            if (err.status === 422) {
+              this._error$.next(err.error.message);
+            }
+
+            // NOTE: use the previous successful request's total items to prevent the datagrid to fire another
+            //       state changes.
+            return of<GitHubUserSearchResults>({
+              total_count: this._previousSuccessfulTotalItems as number,
+              incomplete_results: false,
+              items: [],
+            });
           }),
         );
+      }),
+
+      // hide the loading indicator in the datagrid by setting `loading` property to true
+      tap(() => {
+        this.loading = false;
+        this._cdr.markForCheck();
       }),
 
       // finally, replay any previously emitted values upon subscription
